@@ -4,6 +4,7 @@ import GhostSweepCore
 struct MainWindowView: View {
     @ObservedObject var viewModel: AppViewModel
     @State private var showSettings: Bool = false
+    @State private var isShieldButtonHovered: Bool = false
 
     var body: some View {
         NavigationSplitView {
@@ -106,26 +107,34 @@ struct MainWindowView: View {
             HStack(spacing: 8) {
                 Button(action: { viewModel.startScan() }) {
                     Label("Scan", systemImage: "arrow.clockwise")
+                        .frame(width: 130)
                 }
                 .buttonStyle(.bordered)
+                .controlSize(.regular)
                 .disabled(viewModel.isScanning || viewModel.isSweeping || viewModel.currentTargetURL == nil)
 
                 if let imm = viewModel.immunizationStatus, viewModel.selectedVolume != nil {
                     Button(action: { viewModel.toggleImmunization() }) {
                         Label(
-                            imm.isFullyImmunized ? "Drive Shielded" : "Immunize Drive",
-                            systemImage: imm.isFullyImmunized ? "shield.fill" : "shield"
+                            imm.isFullyImmunized ? (isShieldButtonHovered ? "Unshield Drive" : "Drive Shielded") : "Immunize Drive",
+                            systemImage: imm.isFullyImmunized ? (isShieldButtonHovered ? "shield.slash" : "shield.fill") : "shield"
                         )
+                        .frame(width: 130)
                     }
                     .buttonStyle(.bordered)
-                    .tint(imm.isFullyImmunized ? .green : .accentColor)
-                    .help(imm.isFullyImmunized ? "Drive is immunized against Spotlight, FSEvents, and Trashes. Click to toggle." : "Place hardware prevention markers so macOS cannot index or drop trash on this drive.")
+                    .tint(imm.isFullyImmunized ? (isShieldButtonHovered ? .red : .green) : .accentColor)
+                    .controlSize(.regular)
+                    .onHover { isShieldButtonHovered = $0 }
+                    .animation(.easeInOut(duration: 0.15), value: isShieldButtonHovered)
+                    .help(imm.isFullyImmunized ? "Drive is immunized against Spotlight, FSEvents, and Trashes. Click to remove shield." : "Place hardware prevention markers so macOS cannot index or drop trash on this drive.")
                 }
 
                 Button(action: { viewModel.executeSweep() }) {
                     Label("Clean Now", systemImage: "sparkles")
+                        .frame(width: 130)
                 }
                 .buttonStyle(.borderedProminent)
+                .controlSize(.regular)
                 .disabled(viewModel.isScanning || viewModel.isSweeping || viewModel.selectedItemsCount == 0)
             }
         }
