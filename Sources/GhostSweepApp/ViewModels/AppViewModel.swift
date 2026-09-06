@@ -19,11 +19,19 @@ public final class AppViewModel: ObservableObject {
     @Published public var immunizationStatus: ImmunizationStatus?
     @Published public var systemShieldStatus: SystemShieldStatus?
     @Published public var hasFullDiskAccess: Bool = PermissionManager.hasFullDiskAccess
+    @Published public var launchAtLoginEnabled: Bool = false
 
     // Preset Toggles
     @AppStorage("enableAppleDebris") public var enableAppleDebris: Bool = true
     @AppStorage("enableCrossPlatform") public var enableCrossPlatform: Bool = true
     @AppStorage("enableDeveloper") public var enableDeveloper: Bool = false
+    @AppStorage("showNotificationsEnabled") public var showNotificationsEnabled: Bool = true {
+        didSet {
+            if showNotificationsEnabled {
+                NotificationManager.shared.requestAuthorization()
+            }
+        }
+    }
     @AppStorage("autoCleanOnFinderEject") public var autoCleanOnFinderEject: Bool = false {
         didSet {
             UnmountWatcher.shared.isEnabled = autoCleanOnFinderEject
@@ -42,17 +50,34 @@ public final class AppViewModel: ObservableObject {
     private let systemShield = SystemShield()
 
     public init() {
+        self.launchAtLoginEnabled = LaunchAtLoginManager.shared.isEnabled
+        if showNotificationsEnabled {
+            NotificationManager.shared.requestAuthorization()
+        }
+
         UnmountWatcher.shared.isEnabled = autoCleanOnFinderEject
         UnmountWatcher.shared.onAutoCleanCompleted = { [weak self] name, result in
             Task { @MainActor in
                 self?.lastResult = result
                 self?.currentStatus = "Auto-cleaned '\(name)': \(result.itemsDeleted) items swept"
+                if self?.showNotificationsEnabled == true && result.itemsDeleted > 0 {
+                    NotificationManager.shared.sendNotification(
+                        title: "GhostSweep Auto-Clean",
+                        body: "Swept \(result.itemsDeleted) item(s) from '\(name)' (\(result.formattedReclaimedSize) reclaimed)."
+                    )
+                }
             }
         }
 
         LiveShieldWatcher.shared.onResidueIntercepted = { [weak self] filename, path in
             Task { @MainActor in
                 self?.currentStatus = "Active Shield: Intercepted \(filename) in real-time"
+                if self?.showNotificationsEnabled == true {
+                    NotificationManager.shared.sendNotification(
+                        title: "Active Sentry Intercepted",
+                        body: "Vaporized '\(filename)' before macOS could persist it."
+                    )
+                }
             }
         }
 
@@ -68,6 +93,11 @@ public final class AppViewModel: ObservableObject {
                 self?.refreshVolumes()
             }
         }
+    }
+
+    public func toggleLaunchAtLogin() {
+        LaunchAtLoginManager.shared.isEnabled.toggle()
+        self.launchAtLoginEnabled = LaunchAtLoginManager.shared.isEnabled
     }
 
     public var activeCategories: Set<PresetCategory> {
@@ -250,6 +280,48 @@ public final class AppViewModel: ObservableObject {
             } catch {
                 self.currentStatus = "Eject error: \(error.localizedDescription)"
             }
+        }
+    }
+
+    public func cleanAllVolumes() async -> (totalDeleted: Int, totalReclaimed: Int64) {
+        guard !isSweeping else { return (0, 0) }
+        isSweeping = true
+        currentStatus = "Sweeping all mounted drives..."
+
+        var totalDeleted = 0
+        var totalReclaimed: Int64 = 0
+
+        for volume in mountedVolumes {
+            let items = await fileSweeper.scan(
+                targetURL: volume.url,
+                enabledCategories: activeCategories
+            )
+            let result = await fileSweeper.executeSweep(items: items)
+            totalDeleted += result.itemsDeleted
+            totalReclaimed += result.bytesReclaimed
+        }
+
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .file
+        let formattedSize = formatter.string(fromByteCount: totalReclaimed)
+
+        self.isSweeping = false
+        self.currentStatus = "Cleaned all drives: \(totalDeleted) items swept (\(formattedSize))"
+
+        if showNotificationsEnabled && totalDeleted > 0 {
+            NotificationManager.shared.sendNotification(
+                title: "GhostSweep Clean All",
+                body: "Swept \(totalDeleted) item(s) across all drives (\(formattedSize) reclaimed)."
+            )
+        }
+
+        refreshVolumes()
+        return (totalDeleted, totalReclaimed)
+    }
+
+    public func executeCleanAll() {
+        Task {
+            _ = await cleanAllVolumes()
         }
     }
 }

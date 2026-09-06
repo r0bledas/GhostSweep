@@ -6,12 +6,16 @@
 
 > Native macOS application and CLI tool that cleans and permanently prevents hidden residue files (.DS_Store, AppleDouble ._*, .Spotlight-V100, .Trashes, Windows/Linux metadata) on external drives. Built with Swift and SwiftUI with zero third-party dependencies.
 
-[Download Latest Release (v1.0.1)](https://github.com/r0bledas/GhostSweep/releases/latest) • [All Releases](https://github.com/r0bledas/GhostSweep/releases)
+[Download Latest Release (v1.1.0)](https://github.com/r0bledas/GhostSweep/releases/latest) • [All Releases](https://github.com/r0bledas/GhostSweep/releases)
 
 ---
 
 ## Features
 
+- **Hybrid Lifecycle**: Stays in the Dock while the main window is open, and cleanly hides into the Menu Bar when closed without quitting (`NSApp.setActivationPolicy(.accessory)`).
+- **Compact Menu Bar Extra**: Monitor connected drives at a glance, trigger 1-click **Clean All Drives**, or open the full workspace directly from the menu bar.
+- **Launch at Login**: Optional native `SMAppService` toggle in Settings so Active Sentry and Auto-Clean on Eject run automatically at system startup.
+- **System Notifications**: Native macOS banner alerts notify you when drives are auto-cleaned on eject or when active residue is intercepted.
 - **Drive Immunization**: Places hardware-level prevention markers directly on external volumes:
   - `.metadata_never_index`: Instructs macOS Spotlight to permanently skip indexing the volume.
   - `.fseventsd/no_log`: Disables filesystem event transaction logging.

@@ -18,6 +18,27 @@ struct SettingsView: View {
 
                         VStack(spacing: 0) {
                             settingsToggleRow(
+                                title: "Launch at Login",
+                                subtitle: "Start GhostSweep automatically in the background when logging into macOS.",
+                                isOn: Binding(
+                                    get: { viewModel.launchAtLoginEnabled },
+                                    set: { _ in viewModel.toggleLaunchAtLogin() }
+                                )
+                            )
+
+                            Divider()
+                                .padding(.leading, 12)
+
+                            settingsToggleRow(
+                                title: "System Notifications",
+                                subtitle: "Deliver banner alerts when drives are auto-cleaned on eject or when residue is intercepted.",
+                                isOn: $viewModel.showNotificationsEnabled
+                            )
+
+                            Divider()
+                                .padding(.leading, 12)
+
+                            settingsToggleRow(
                                 title: "Active Real-Time Sentry",
                                 subtitle: "Monitors mounted external drives and removes .DS_Store and ._* files immediately upon creation.",
                                 isOn: $viewModel.liveShieldEnabled
@@ -137,7 +158,7 @@ struct SettingsView: View {
             }
         }
         .padding(20)
-        .frame(width: 520, height: 500)
+        .frame(width: 520, height: 560)
     }
 
     private func settingsToggleRow(

@@ -2,7 +2,7 @@
 set -e
 
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-VERSION="1.0.1"
+VERSION="1.1.0"
 DIST_DIR="$PROJECT_DIR/dist"
 APP_DIR="$PROJECT_DIR/GhostSweep.app"
 CLI_BIN="$PROJECT_DIR/.build/release/ghostsweep"

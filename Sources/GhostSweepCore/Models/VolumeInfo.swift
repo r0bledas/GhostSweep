@@ -56,4 +56,16 @@ public struct VolumeInfo: Identifiable, Hashable, Sendable {
         formatter.countStyle = .file
         return "\(formatter.string(fromByteCount: usedBytes)) used of \(formatter.string(fromByteCount: totalBytes))"
     }
+
+    public var formattedAvailableCapacity: String {
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: availableBytes)
+    }
+
+    public var formattedTotalCapacity: String {
+        let formatter = ByteCountFormatter()
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: totalBytes)
+    }
 }

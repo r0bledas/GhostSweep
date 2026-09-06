@@ -27,14 +27,14 @@ struct GhostSweepCLI {
         case "shield":
             await handleShield(args: Array(args.dropFirst(2)))
         default:
-            print("❌ Unknown command: \(command)")
+            print("Error: Unknown command: \(command)")
             printHelp()
         }
     }
 
     static func printHelp() {
         print("""
-        👻 GhostSweep CLI — Clean & Prevent residue hidden files on external drives
+        GhostSweep CLI — Clean and prevent residue hidden files on external drives
         
         USAGE:
           ghostsweep <command> [options]
@@ -44,7 +44,7 @@ struct GhostSweepCLI {
           scan <path>              Preview hidden junk files found at path
           clean <path> [options]   Remove residue files from target drive or folder
           immunize <path>          Place hardware prevention markers (.metadata_never_index, no_log, .Trashes lock)
-          watch <path>             Run active real-time sentry to vaporize .DS_Store & ._* instantly
+          watch <path>             Run active real-time sentry to vaporize .DS_Store and ._* instantly
           shield [--apply]         Check or apply system-wide USB .DS_Store prevention
 
         CLEAN OPTIONS:
@@ -66,14 +66,14 @@ struct GhostSweepCLI {
         let volumes = manager.getMountedVolumes()
 
         if volumes.isEmpty {
-            print("ℹ️ No removable or external drives currently mounted.")
+            print("No removable or external drives currently mounted.")
             return
         }
 
-        print("📦 Detected External & Removable Drives:")
+        print("Detected External & Removable Drives:")
         print("------------------------------------------------------------")
         for v in volumes {
-            let status = v.isSafeToClean ? "✅ Safe" : "⚠️ Protected"
+            let status = v.isSafeToClean ? "Safe" : "Protected"
             print("• \(v.name) (\(v.fileSystemType)) [\(status)]")
             print("  Mount: \(v.mountPoint)")
             if v.totalBytes > 0 {
@@ -85,7 +85,7 @@ struct GhostSweepCLI {
 
     static func handleScan(args: [String]) async {
         guard let path = args.first(where: { !$0.hasPrefix("-") }) else {
-            print("❌ Error: Missing path to scan. Usage: ghostsweep scan <path>")
+            print("Error: Missing path to scan. Usage: ghostsweep scan <path>")
             return
         }
 
@@ -93,7 +93,7 @@ struct GhostSweepCLI {
         let manager = VolumeManager()
 
         guard manager.isSafeTarget(url: targetURL) else {
-            print("❌ Safety Refusal: '\(targetURL.path)' is an internal macOS system location.")
+            print("Safety Refusal: '\(targetURL.path)' is an internal macOS system location.")
             return
         }
 
@@ -102,12 +102,12 @@ struct GhostSweepCLI {
             categories.insert(.developer)
         }
 
-        print("🔍 Scanning '\(targetURL.path)' for residue files...")
+        print("Scanning '\(targetURL.path)' for residue files...")
         let sweeper = FileSweeper()
         let items = await sweeper.scan(targetURL: targetURL, enabledCategories: categories)
 
         if items.isEmpty {
-            print("✨ Clean! No ghost or residue files found.")
+            print("Clean! No ghost or residue files found.")
             return
         }
 
@@ -120,8 +120,8 @@ struct GhostSweepCLI {
         for (cat, groupItems) in grouped {
             print("\n[\(cat.displayName)]")
             for item in groupItems.prefix(15) {
-                let icon = item.isDirectory ? "📁" : "📄"
-                print("  \(icon) \(item.filename) (\(item.formattedSize)) - \(item.path)")
+                let kind = item.isDirectory ? "[DIR] " : "      "
+                print("  \(kind)\(item.filename) (\(item.formattedSize)) - \(item.path)")
             }
             if groupItems.count > 15 {
                 print("  ... and \(groupItems.count - 15) more")
@@ -133,12 +133,12 @@ struct GhostSweepCLI {
         let formatter = ByteCountFormatter()
         formatter.countStyle = .file
         print("\n------------------------------------------------------------")
-        print("📊 Total potential space to reclaim: \(formatter.string(fromByteCount: totalSize))")
+        print("Total potential space to reclaim: \(formatter.string(fromByteCount: totalSize))")
     }
 
     static func handleClean(args: [String]) async {
         guard let path = args.first(where: { !$0.hasPrefix("-") }) else {
-            print("❌ Error: Missing path to clean. Usage: ghostsweep clean <path> [options]")
+            print("Error: Missing path to clean. Usage: ghostsweep clean <path> [options]")
             return
         }
 
@@ -146,7 +146,7 @@ struct GhostSweepCLI {
         let manager = VolumeManager()
 
         guard manager.isSafeTarget(url: targetURL) else {
-            print("❌ Safety Refusal: '\(targetURL.path)' is an internal macOS system location.")
+            print("Safety Refusal: '\(targetURL.path)' is an internal macOS system location.")
             return
         }
 
@@ -157,12 +157,12 @@ struct GhostSweepCLI {
             categories.insert(.developer)
         }
 
-        print("🔍 Scanning '\(targetURL.path)'...")
+        print("Scanning '\(targetURL.path)'...")
         let sweeper = FileSweeper()
         let items = await sweeper.scan(targetURL: targetURL, enabledCategories: categories)
 
         if items.isEmpty {
-            print("✨ Nothing to clean! Drive is already clean.")
+            print("Nothing to clean! Drive is already clean.")
             return
         }
 
@@ -180,15 +180,15 @@ struct GhostSweepCLI {
             }
         }
 
-        print("🧹 Sweeping...")
+        print("Sweeping...")
         let result = await sweeper.executeSweep(
             items: items
         )
 
-        print("✅ Swept \(result.itemsDeleted) item(s), reclaimed \(result.formattedReclaimedSize)!")
+        print("Swept \(result.itemsDeleted) item(s), reclaimed \(result.formattedReclaimedSize)!")
 
         if !result.errors.isEmpty {
-            print("⚠️ Notices during sweep:")
+            print("Notices during sweep:")
             for err in result.errors {
                 print("  - \(err)")
             }
@@ -197,50 +197,50 @@ struct GhostSweepCLI {
 
     static func handleImmunize(args: [String]) async {
         guard let path = args.first else {
-            print("❌ Error: Missing path. Usage: ghostsweep immunize <path>")
+            print("Error: Missing path. Usage: ghostsweep immunize <path>")
             return
         }
 
         let targetURL = URL(fileURLWithPath: path).standardized
         let manager = VolumeManager()
         guard manager.isSafeTarget(url: targetURL) else {
-            print("❌ Safety Refusal: Cannot immunize system root or internal drives.")
+            print("Safety Refusal: Cannot immunize system root or internal drives.")
             return
         }
 
-        print("🛡️ Immunizing '\(targetURL.path)'...")
+        print("Immunizing '\(targetURL.path)'...")
         do {
             let status = try await DriveImmunizer.shared.immunize(volumeURL: targetURL)
-            print("✅ Drive immunization completed successfully!")
+            print("Drive immunization completed successfully.")
             print("  • Spotlight Indexing: \(status.hasSpotlightShield ? "Blocked (.metadata_never_index)" : "Failed")")
             print("  • FSEvents Logging:   \(status.hasFSEventsShield ? "Blocked (.fseventsd/no_log)" : "Failed")")
             print("  • Trash Accumulation: \(status.hasTrashShield ? "Neutralized (.Trashes locked)" : "Failed")")
             print("Macs will now avoid writing residue metadata to this drive.")
         } catch {
-            print("❌ Immunization failed: \(error.localizedDescription)")
+            print("Immunization failed: \(error.localizedDescription)")
         }
     }
 
     static func handleWatch(args: [String]) async {
         guard let path = args.first else {
-            print("❌ Error: Missing path. Usage: ghostsweep watch <path>")
+            print("Error: Missing path. Usage: ghostsweep watch <path>")
             return
         }
 
         let targetURL = URL(fileURLWithPath: path).standardized
         let manager = VolumeManager()
         guard manager.isSafeTarget(url: targetURL) else {
-            print("❌ Safety Refusal: Cannot watch system directories.")
+            print("Safety Refusal: Cannot watch system directories.")
             return
         }
 
-        print("🛡️ Starting Active Real-Time Sentry on '\(targetURL.path)'...")
+        print("Starting Active Real-Time Sentry on '\(targetURL.path)'...")
         print("Any .DS_Store, AppleDouble (._*), or Thumbs.db created will be vaporized instantly.")
         print("Press Ctrl+C to stop.")
 
         LiveShieldWatcher.shared.onResidueIntercepted = { filename, filePath in
             let timestamp = ISO8601DateFormatter().string(from: Date())
-            print("[\(timestamp)] ⚡ Vaporized: \(filename) at \(filePath)")
+            print("[\(timestamp)] Vaporized: \(filename) at \(filePath)")
         }
 
         LiveShieldWatcher.shared.startLiveShield(for: [targetURL.path])
@@ -253,18 +253,17 @@ struct GhostSweepCLI {
         let systemShield = SystemShield()
 
         if args.contains("--apply") || args.contains("-a") {
-            print("🛡️ Applying macOS system-wide USB prevention settings...")
+            print("Applying macOS system-wide USB prevention settings...")
             systemShield.applySystemShields(disableUSB: true, disableNetwork: true)
-            print("✅ Applied: macOS Finder will no longer write .DS_Store files to USB or Network drives.")
+            print("Applied: macOS Finder will no longer write .DS_Store files to USB or Network drives.")
         } else {
             let status = systemShield.getStatus()
-            print("🛡️ macOS System-Wide Shield Status:")
-            print("  • DSDontWriteUSBStores:     \(status.usbStoresDisabled ? "✅ ACTIVE (Blocked)" : "❌ Disabled")")
-            print("  • DSDontWriteNetworkStores: \(status.networkStoresDisabled ? "✅ ACTIVE (Blocked)" : "❌ Disabled")")
+            print("macOS System-Wide Shield Status:")
+            print("  • DSDontWriteUSBStores:     \(status.usbStoresDisabled ? "ACTIVE (Blocked)" : "Disabled")")
+            print("  • DSDontWriteNetworkStores: \(status.networkStoresDisabled ? "ACTIVE (Blocked)" : "Disabled")")
             if !status.isFullyShielded {
                 print("\nRun 'ghostsweep shield --apply' to activate protection.")
             }
         }
     }
 }
-
