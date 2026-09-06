@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Swift Package Manager & Build Artifacts
+.build/
+.swiftpm/
+GhostSweep.app/
+DerivedData/
+*.dSYM/
+
+# User-specific Xcode files
+xcuserdata/
+*.xcuserstate
