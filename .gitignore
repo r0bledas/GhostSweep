@@ -9,6 +9,9 @@
 GhostSweep.app/
 DerivedData/
 *.dSYM/
+dist/
+*.dmg
+*.zip
 
 # User-specific Xcode files
 xcuserdata/

@@ -1,9 +1,12 @@
-.PHONY: all build test clean run cli install
+.PHONY: all build test clean run cli install package
 
 all: build
 
 build:
 	@./scripts/build_app.sh
+
+package:
+	@./scripts/package.sh
 
 test:
 	@swift test
@@ -24,4 +27,4 @@ install: build
 	@echo "Installation complete!"
 
 clean:
-	@rm -rf .build GhostSweep.app
+	@rm -rf .build GhostSweep.app dist
