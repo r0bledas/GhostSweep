@@ -5,6 +5,7 @@ struct DrivesListView: View {
     @ObservedObject var viewModel: AppViewModel
     @State private var isTargetedForDrop: Bool = false
     @State private var isFolderHovered: Bool = false
+    @State private var isRefreshHovered: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -16,9 +17,21 @@ struct DrivesListView: View {
                 Spacer()
                 Button(action: { viewModel.refreshVolumes() }) {
                     Image(systemName: "arrow.clockwise")
-                        .font(.caption)
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundColor(isRefreshHovered ? .primary : .secondary)
+                        .frame(width: 24, height: 24)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(isRefreshHovered ? Color.secondary.opacity(0.20) : Color.secondary.opacity(0.10))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .strokeBorder(Color.secondary.opacity(0.18), lineWidth: 1)
+                        )
+                        .contentShape(RoundedRectangle(cornerRadius: 6))
                 }
                 .buttonStyle(.plain)
+                .onHover { isRefreshHovered = $0 }
                 .help("Refresh mounted drives")
             }
             .padding(.horizontal, 12)

@@ -52,7 +52,7 @@ public final class AppViewModel: ObservableObject {
 
         LiveShieldWatcher.shared.onResidueIntercepted = { [weak self] filename, path in
             Task { @MainActor in
-                self?.currentStatus = "🛡️ Active Shield: Vaporized \(filename) in real-time"
+                self?.currentStatus = "Active Shield: Intercepted \(filename) in real-time"
             }
         }
 
@@ -126,7 +126,7 @@ public final class AppViewModel: ObservableObject {
 
     public func selectCustomFolder(_ url: URL) {
         guard volumeManager.isSafeTarget(url: url) else {
-            self.currentStatus = "⚠️ Cannot select internal system directory"
+            self.currentStatus = "Cannot select internal system directory"
             return
         }
         self.customFolderURL = url
@@ -149,7 +149,7 @@ public final class AppViewModel: ObservableObject {
     public func applySystemShieldSettings() {
         systemShield.applySystemShields(disableUSB: true, disableNetwork: true)
         refreshSystemShieldStatus()
-        currentStatus = "🛡️ System Shield Applied: macOS won't write .DS_Store to USB drives"
+        currentStatus = "System Shield Applied: macOS will not write .DS_Store to USB drives"
     }
 
     public func toggleImmunization() {
@@ -163,7 +163,7 @@ public final class AppViewModel: ObservableObject {
                 } else {
                     // Immunize
                     self.immunizationStatus = try await driveImmunizer.immunize(volumeURL: url)
-                    self.currentStatus = "🛡️ \(url.lastPathComponent) is now Immunized against hidden residue!"
+                    self.currentStatus = "\(url.lastPathComponent) is now immunized against hidden residue"
                 }
             } catch {
                 self.currentStatus = "Immunize error: \(error.localizedDescription)"

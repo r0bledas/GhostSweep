@@ -104,6 +104,12 @@ struct MainWindowView: View {
 
             // Header Action Buttons
             HStack(spacing: 8) {
+                Button(action: { viewModel.startScan() }) {
+                    Label("Scan", systemImage: "arrow.clockwise")
+                }
+                .buttonStyle(.bordered)
+                .disabled(viewModel.isScanning || viewModel.isSweeping || viewModel.currentTargetURL == nil)
+
                 if let imm = viewModel.immunizationStatus, viewModel.selectedVolume != nil {
                     Button(action: { viewModel.toggleImmunization() }) {
                         Label(
@@ -115,11 +121,6 @@ struct MainWindowView: View {
                     .tint(imm.isFullyImmunized ? .green : .accentColor)
                     .help(imm.isFullyImmunized ? "Drive is immunized against Spotlight, FSEvents, and Trashes. Click to toggle." : "Place hardware prevention markers so macOS cannot index or drop trash on this drive.")
                 }
-
-                Button(action: { viewModel.startScan() }) {
-                    Label("Scan", systemImage: "arrow.clockwise")
-                }
-                .disabled(viewModel.isScanning || viewModel.isSweeping || viewModel.currentTargetURL == nil)
 
                 Button(action: { viewModel.executeSweep() }) {
                     Label("Clean Now", systemImage: "sparkles")
