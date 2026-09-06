@@ -6,6 +6,8 @@
 
 > Native macOS application and CLI tool that cleans and permanently prevents hidden residue files (.DS_Store, AppleDouble ._*, .Spotlight-V100, .Trashes, Windows/Linux metadata) on external drives. Built with Swift and SwiftUI with zero third-party dependencies.
 
+[Download Latest Release (v1.0.0)](https://github.com/r0bledas/GhostSweep/releases/latest) • [All Releases](https://github.com/r0bledas/GhostSweep/releases)
+
 ---
 
 ## Features
